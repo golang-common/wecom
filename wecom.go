@@ -17,6 +17,7 @@ import (
 	"net/url"
 	"path"
 	"strconv"
+	"time"
 )
 
 const (
@@ -40,9 +41,35 @@ func New(corpid, secret string) *Wecom {
 // corpSecret - 企业应用密钥
 type Wecom struct {
 	token       string
-	tokenExpire int
+	tokenExpire time.Time
 	corpID      string
 	corpSecret  string
+}
+
+// Check 本地校验对象的可用性
+func (w *Wecom) Check() error {
+	if w.token == "" {
+		return errors.New("token is nil")
+	}
+	if time.Now().Unix() > w.tokenExpire.Unix() {
+		return errors.New("token expired")
+	}
+	if w.corpID == "" || w.corpSecret == "" {
+		return errors.New("object not initialized")
+	}
+	return nil
+}
+
+// CheckAndAuth 如果校验不通过则发起认证
+func (w *Wecom) CheckAndAuth() error {
+	if w.Check() == nil {
+		return nil
+	}
+	err := w.Auth()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // Auth 获取并设置企业微信token
@@ -89,7 +116,7 @@ func (w *Wecom) Auth() error {
 		return errors.New(token.Errmsg)
 	}
 	w.token = token.AccessToken
-	w.tokenExpire = token.ExpiresIn
+	w.tokenExpire = time.Now().Add(time.Duration(token.ExpiresIn) * time.Second)
 	return nil
 }
 
