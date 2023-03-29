@@ -123,7 +123,7 @@ func (w *Wecom) Auth() error {
 // get 通用的get方法,返回body内容或错误
 // p - 请求路径
 // query - 请求的url-query
-func (w *Wecom) get(p string, query url.Values) (map[string][]byte, error) {
+func (w *Wecom) get(p string, query url.Values) (map[string]json.RawMessage, error) {
 	if query == nil {
 		query = url.Values{}
 	}
@@ -153,25 +153,28 @@ func (w *Wecom) get(p string, query url.Values) (map[string][]byte, error) {
 }
 
 // post 通用post请求,返回body内容或错误
-func (w *Wecom) post(p string, b interface{}) (map[string][]byte, error) {
+func (w *Wecom) post(p string, b interface{}) (map[string]json.RawMessage, error) {
+	query := url.Values{}
+	query.Add("access_token", w.token)
 	req := &http.Request{
 		Method: http.MethodPost,
 		URL: &url.URL{
-			Scheme: "https",
-			Host:   apiHost,
-			Path:   path.Join(basePath, p),
+			Scheme:   "https",
+			Host:     apiHost,
+			Path:     path.Join(basePath, p),
+			RawQuery: query.Encode(),
 		},
 	}
 	bb, err := json.Marshal(b)
 	if err != nil {
 		return nil, err
 	}
-	reqBodyMap := make(map[string][]byte)
+	reqBodyMap := make(map[string]json.RawMessage)
 	err = json.Unmarshal(bb, &reqBodyMap)
 	if err != nil {
 		return nil, err
 	}
-	reqBodyMap["access_token"] = []byte(w.token)
+	//reqBodyMap["access_token"] = []byte(w.token)
 	body, _ := json.Marshal(reqBodyMap)
 	req.Body = io.NopCloser(bytes.NewReader(body))
 	resp, err := http.DefaultClient.Do(req)
@@ -189,14 +192,14 @@ func (w *Wecom) post(p string, b interface{}) (map[string][]byte, error) {
 	return mpBytes, nil
 }
 
-func parseResponseBody(body []byte) (map[string][]byte, error) {
+func parseResponseBody(body []byte) (map[string]json.RawMessage, error) {
 	var r = make(map[string]json.RawMessage)
 	err := json.Unmarshal(body, &r)
 	if err != nil {
 		return nil, err
 	}
 	var ecode Error
-	var rb map[string][]byte
+	var rb = make(map[string]json.RawMessage)
 	for k, v := range r {
 		if k == "errcode" {
 			ec, _ := strconv.Atoi(string(v))
@@ -216,7 +219,7 @@ func parseResponseBody(body []byte) (map[string][]byte, error) {
 	return rb, nil
 }
 
-func umarshalObject(data map[string][]byte, obj interface{}) error {
+func umarshalObject(data map[string]json.RawMessage, obj interface{}) error {
 	datab, err := json.Marshal(data)
 	if err != nil {
 		return err

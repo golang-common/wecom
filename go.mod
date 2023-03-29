@@ -1,4 +1,4 @@
-module wecom
+module github.com/golang-common/wecom
 
 go 1.20
 
