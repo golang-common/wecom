@@ -194,6 +194,6 @@ func (e Error) Check() error {
 // CodeAuthRequest 用户发起授权码验证的请求信息
 type CodeAuthRequest struct {
 	Code  string `json:"code" form:"code"`
-	State string `json:"state" form:"code"`
+	State string `json:"state" form:"state"`
 	Appid string `json:"appid" form:"appid"`
 }
