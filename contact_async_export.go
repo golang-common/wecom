@@ -9,12 +9,14 @@ package wecom
 import (
 	"bytes"
 	"crypto/md5"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 // AsyncExportUser 导出成员
@@ -23,7 +25,7 @@ import (
 // blockSize - 10^4 ~ 10^6之间，默认10^6
 func (w *Wecom) AsyncExportUser(aeskey string, blockSize ...int) (string, error) {
 	var a = map[string]string{
-		"encoding_aeskey": aeskey,
+		"encoding_aeskey": base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString([]byte(aeskey)),
 	}
 	if len(blockSize) > 0 {
 		a["block_size"] = strconv.Itoa(blockSize[0])
@@ -32,7 +34,8 @@ func (w *Wecom) AsyncExportUser(aeskey string, blockSize ...int) (string, error)
 	if err != nil {
 		return "", err
 	}
-	return string(body["jobid"]), nil
+	jobid := strings.Trim(string(body["jobid"]), `"`)
+	return jobid, nil
 }
 
 // AsyncExportUserDetail 导出成员详细信息
@@ -41,7 +44,7 @@ func (w *Wecom) AsyncExportUser(aeskey string, blockSize ...int) (string, error)
 // blockSize - 10^4 ~ 10^6之间，默认10^6
 func (w *Wecom) AsyncExportUserDetail(aeskey string, blockSize ...int) (string, error) {
 	var a = map[string]string{
-		"encoding_aeskey": aeskey,
+		"encoding_aeskey": base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString([]byte(aeskey)),
 	}
 	if len(blockSize) > 0 {
 		a["block_size"] = strconv.Itoa(blockSize[0])
@@ -50,7 +53,8 @@ func (w *Wecom) AsyncExportUserDetail(aeskey string, blockSize ...int) (string, 
 	if err != nil {
 		return "", err
 	}
-	return string(body["jobid"]), nil
+	jobid := strings.Trim(string(body["jobid"]), `"`)
+	return jobid, nil
 }
 
 // AsyncExportDepartment 导出部门
@@ -59,7 +63,7 @@ func (w *Wecom) AsyncExportUserDetail(aeskey string, blockSize ...int) (string, 
 // blockSize - 10^4 ~ 10^6之间，默认10^6
 func (w *Wecom) AsyncExportDepartment(aeskey string, blockSize ...int) (string, error) {
 	var a = map[string]string{
-		"encoding_aeskey": aeskey,
+		"encoding_aeskey": base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString([]byte(aeskey)),
 	}
 	if len(blockSize) > 0 {
 		a["block_size"] = strconv.Itoa(blockSize[0])
@@ -68,7 +72,8 @@ func (w *Wecom) AsyncExportDepartment(aeskey string, blockSize ...int) (string, 
 	if err != nil {
 		return "", err
 	}
-	return string(body["jobid"]), nil
+	jobid := strings.Trim(string(body["jobid"]), `"`)
+	return jobid, nil
 }
 
 // AsyncExportTagMember 导出标签成员
@@ -78,7 +83,7 @@ func (w *Wecom) AsyncExportDepartment(aeskey string, blockSize ...int) (string, 
 // tagid - 标签id
 func (w *Wecom) AsyncExportTagMember(tagid, aeskey string, blockSize ...int) (string, error) {
 	var a = map[string]string{
-		"encoding_aeskey": aeskey,
+		"encoding_aeskey": base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString([]byte(aeskey)),
 		"tagid":           tagid,
 	}
 	if len(blockSize) > 0 {
@@ -88,7 +93,8 @@ func (w *Wecom) AsyncExportTagMember(tagid, aeskey string, blockSize ...int) (st
 	if err != nil {
 		return "", err
 	}
-	return string(body["jobid"]), nil
+	jobid := strings.Trim(string(body["jobid"]), `"`)
+	return jobid, nil
 }
 
 // AsyncExportGetResult 根据jobid，获取导出任务结果

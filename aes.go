@@ -108,12 +108,12 @@ func AesDecryptGCM(crypt, key, nonce []byte) ([]byte, error) {
 	return decrypt, nil
 }
 
-var quickKey = []byte("daipengyuan-1987")
+var QuickKey = []byte("daipengyuan-1987")
 
 // QuickEncrypt 使用aes-gcm与内置默认密钥快速加密
 func QuickEncrypt(msg string) string {
 	salt := []byte(RandString(12))
-	crypted, err := AesEncryptGCM([]byte(msg), quickKey, salt)
+	crypted, err := AesEncryptGCM([]byte(msg), QuickKey, salt)
 	if err != nil {
 		return ""
 	}
@@ -134,8 +134,8 @@ func QuickDecrypt(crypt string) string {
 	crypted64 := []byte(cryptedl[2])
 	enc := base64.URLEncoding.WithPadding(base64.NoPadding)
 	crypted := make([]byte, enc.DecodedLen(len(crypted64)))
-	enc.Decode(crypted, crypted64)
-	msg, err := AesDecryptGCM(crypted, quickKey, salt)
+	_, _ = enc.Decode(crypted, crypted64)
+	msg, err := AesDecryptGCM(crypted, QuickKey, salt)
 	if err != nil {
 		return ""
 	}
@@ -144,12 +144,12 @@ func QuickDecrypt(crypt string) string {
 
 func RandString(len int) string {
 	rd := rand.New(rand.NewSource(time.Now().Unix()))
-	bytes := make([]byte, len)
+	r := make([]byte, len)
 	for i := 0; i < len; i++ {
 		b := rd.Intn(26) + 65
-		bytes[i] = byte(b)
+		r[i] = byte(b)
 	}
-	return string(bytes)
+	return string(r)
 }
 
 /*

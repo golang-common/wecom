@@ -34,16 +34,16 @@ func New(corpid, secret string) *Wecom {
 	}
 }
 
-// Request 企业微信服务端API实例
-// token - 交互时的认证token
-// tokenExpire - token的超时秒数
-// corpID - 企业ID
-// corpSecret - 企业应用密钥
 type Wecom struct {
 	token       string
 	tokenExpire time.Time
 	corpID      string
 	corpSecret  string
+	debug       bool
+}
+
+func (w *Wecom) Debug() {
+	w.debug = true
 }
 
 // Check 本地校验对象的可用性
@@ -70,6 +70,10 @@ func (w *Wecom) CheckAndAuth() error {
 		return err
 	}
 	return nil
+}
+
+func (w *Wecom) NewAesKey() string {
+	return RandString(32)
 }
 
 // Auth 获取并设置企业微信token
@@ -128,6 +132,9 @@ func (w *Wecom) get(p string, query url.Values) (map[string]json.RawMessage, err
 		query = url.Values{}
 	}
 	query.Add("access_token", w.token)
+	if w.debug {
+		query.Add("debug", "1")
+	}
 	req := &http.Request{
 		Method: http.MethodGet,
 		URL: &url.URL{
@@ -156,6 +163,9 @@ func (w *Wecom) get(p string, query url.Values) (map[string]json.RawMessage, err
 func (w *Wecom) post(p string, b interface{}) (map[string]json.RawMessage, error) {
 	query := url.Values{}
 	query.Add("access_token", w.token)
+	if w.debug {
+		query.Add("debug", "1")
+	}
 	req := &http.Request{
 		Method: http.MethodPost,
 		URL: &url.URL{
